@@ -1,17 +1,14 @@
 {
   "name": "MLOps Churn Prediction",
-  "image": "mcr.microsoft.com/devcontainers/python:3.10-bullseye",
 
-  "features": {
-    "ghcr.io/devcontainers/features/docker-in-docker:2": {
-      "version": "latest",
-      "enableNonRootDocker": "true",
-      "moby": "true"
-    }
-  },
+  // Using GitHub's Universal image — has Python, Docker, Node, git pre-installed
+  // No feature installation needed → faster startup, no GPG key errors
+  "image": "mcr.microsoft.com/devcontainers/universal:2",
 
+  // Auto-run setup script after container creation
   "postCreateCommand": "bash .devcontainer/setup.sh",
 
+  // Auto-forward ports so you can click to open in browser
   "forwardPorts": [8000, 5000],
 
   "portsAttributes": {
@@ -36,14 +33,11 @@
         "eamodio.gitlens"
       ],
       "settings": {
-        "python.defaultInterpreterPath": "/usr/local/bin/python",
+        "python.defaultInterpreterPath": "/usr/local/python/current/bin/python",
         "python.linting.enabled": true,
-        "python.linting.flake8Enabled": true,
         "editor.formatOnSave": true,
         "terminal.integrated.defaultProfile.linux": "bash"
       }
     }
-  },
-
-  "remoteUser": "vscode"
+  }
 }
