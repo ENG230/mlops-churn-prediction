@@ -1,0 +1,82 @@
+# ============================================================
+# Docker Compose - Local MLOps Stack
+# ============================================================
+# Runs the complete MLOps stack locally:
+#   - churn-api:    FastAPI prediction service
+#   - mlflow:       Experiment tracking UI
+#
+# Usage:
+#   docker-compose up          # Start all services
+#   docker-compose up mlflow   # Start only MLflow
+#   docker-compose down        # Stop all services
+# ============================================================
+
+version: "3.8"
+
+services:
+  # ── Churn Prediction API ──────────────────────────────────
+  churn-api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: runtime
+    container_name: churn-prediction-api
+    ports:
+      - "8000:8000"
+    volumes:
+      # Mount local artifacts so container uses trained model
+      - ./models:/app/models
+      - ./mlruns:/app/mlruns
+      - ./data:/app/data
+      - ./reports:/app/reports
+      - ./configs:/app/configs
+    environment:
+      - PYTHONPATH=/app
+      - MLFLOW_TRACKING_URI=mlruns
+    healthcheck:
+      test: ["CMD", "python", "-c",
+             "import urllib.request; urllib.request.urlopen('http://localhost:8000/health')"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
+    restart: unless-stopped
+    depends_on:
+      - mlflow
+    networks:
+      - mlops-network
+
+  # ── MLflow Tracking Server ────────────────────────────────
+  mlflow:
+    image: python:3.10-slim
+    container_name: mlflow-server
+    ports:
+      - "5000:5000"
+    volumes:
+      - ./mlruns:/mlflow/mlruns
+      - ./mlartifacts:/mlflow/mlartifacts
+    command: >
+      bash -c "pip install mlflow==2.9.2 --quiet &&
+               mlflow server
+               --host 0.0.0.0
+               --port 5000
+               --backend-store-uri /mlflow/mlruns
+               --default-artifact-root /mlflow/mlartifacts"
+    healthcheck:
+      test: ["CMD", "python", "-c",
+             "import urllib.request; urllib.request.urlopen('http://localhost:5000/health')"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 30s
+    restart: unless-stopped
+    networks:
+      - mlops-network
+
+networks:
+  mlops-network:
+    driver: bridge
+
+volumes:
+  mlruns:
+  mlartifacts:

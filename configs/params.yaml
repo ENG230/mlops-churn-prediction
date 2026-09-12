@@ -1,0 +1,84 @@
+# ============================================================
+# MLOps Churn Prediction - Configuration File
+# All hyperparameters and settings are externalized here
+# ============================================================
+
+data:
+  raw_data_path: "data/raw/churn_data.csv"
+  processed_train_path: "data/processed/train.csv"
+  processed_test_path: "data/processed/test.csv"
+  processed_reference_path: "data/processed/reference.csv"
+  test_size: 0.2
+  random_state: 42
+  target_column: "Churn"
+
+features:
+  numerical_features:
+    - "tenure"
+    - "MonthlyCharges"
+    - "TotalCharges"
+  categorical_features:
+    - "gender"
+    - "SeniorCitizen"
+    - "Partner"
+    - "Dependents"
+    - "PhoneService"
+    - "MultipleLines"
+    - "InternetService"
+    - "OnlineSecurity"
+    - "OnlineBackup"
+    - "DeviceProtection"
+    - "TechSupport"
+    - "StreamingTV"
+    - "StreamingMovies"
+    - "Contract"
+    - "PaperlessBilling"
+    - "PaymentMethod"
+  drop_columns:
+    - "customerID"
+
+model:
+  algorithm: "random_forest"   # Options: random_forest, xgboost, logistic_regression
+  random_forest:
+    n_estimators: 100
+    max_depth: 10
+    min_samples_split: 5
+    min_samples_leaf: 2
+    random_state: 42
+    n_jobs: -1
+    class_weight: "balanced"
+  xgboost:
+    n_estimators: 100
+    max_depth: 6
+    learning_rate: 0.1
+    subsample: 0.8
+    colsample_bytree: 0.8
+    random_state: 42
+    use_label_encoder: false
+    eval_metric: "logloss"
+  logistic_regression:
+    C: 1.0
+    max_iter: 1000
+    random_state: 42
+
+evaluation:
+  metrics:
+    - "accuracy"
+    - "precision"
+    - "recall"
+    - "f1"
+    - "roc_auc"
+  min_accuracy_threshold: 0.70   # Realistic for imbalanced churn dataset
+  min_f1_threshold: 0.40         # Churn class F1 (minority class)
+  min_roc_auc_threshold: 0.75    # Discriminative ability threshold
+
+mlflow:
+  experiment_name: "churn-prediction"
+  model_name: "churn-classifier"
+  tracking_uri: "sqlite:///mlflow.db"
+  artifact_location: "mlartifacts"
+
+monitoring:
+  drift_threshold: 0.1
+  reference_data_path: "data/processed/reference.csv"
+  report_output_path: "reports/"
