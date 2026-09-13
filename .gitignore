@@ -26,6 +26,8 @@ models/*.h5
 # MLflow
 mlruns/
 mlartifacts/
+mlflow.db
+*.db
 
 # Reports (generated)
 reports/*.png
