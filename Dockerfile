@@ -11,7 +11,7 @@
 # ============================================================
 
 # ── Stage 1: Builder ────────────────────────────────────────
-FROM python:3.10-slim as builder
+FROM python:3.10-slim AS builder
 
 WORKDIR /app
 
@@ -27,7 +27,7 @@ RUN pip install --upgrade pip && \
     pip install --no-cache-dir --user -r requirements.txt
 
 # ── Stage 2: Runtime ────────────────────────────────────────
-FROM python:3.10-slim as runtime
+FROM python:3.10-slim AS runtime
 
 # Security: Run as non-root user
 RUN groupadd -r mlops && useradd -r -g mlops mlops
