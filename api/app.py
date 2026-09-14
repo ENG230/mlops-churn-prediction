@@ -268,6 +268,13 @@ def load_model_and_preprocessor(config_path: str = "configs/params.yaml"):
             except Exception as e:
                 logger.warning(f"Could not load from MLflow runs: {e}")
 
+        # Try loading model directly from joblib file first (most reliable for Docker)
+        model_joblib_path = "models/model.joblib"
+        if Path(model_joblib_path).exists():
+            app_state.model = joblib.load(model_joblib_path)
+            app_state.model_version = "joblib/latest"
+            logger.info(f"✅ Model loaded from file: {model_joblib_path}")
+
         # Load preprocessor
         preprocessor_path = "models/preprocessor.joblib"
         if Path(preprocessor_path).exists():

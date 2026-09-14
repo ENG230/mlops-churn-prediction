@@ -340,6 +340,11 @@ def train_model(config_path: str = "configs/params.yaml") -> dict:
         # ── Log Config as Artifact ───────────────────────────────
         mlflow.log_artifact(config_path, "config")
 
+        # ── Save model as joblib (for Docker/direct loading) ─────
+        model_joblib_path = "models/model.joblib"
+        joblib.dump(model, model_joblib_path)
+        logger.info(f"Model saved to {model_joblib_path}")
+
         # ── Log Preprocessor ─────────────────────────────────────
         preprocessor_path = "models/preprocessor.joblib"
         if Path(preprocessor_path).exists():
